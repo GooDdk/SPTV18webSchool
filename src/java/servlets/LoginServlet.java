@@ -5,9 +5,11 @@
  */
 package servlets;
 
-import entity.Person;
+import entity.Journal;
 import entity.Subject;
+import entity.Person;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
@@ -15,6 +17,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import session.JournalFacade;
 import session.PersonFacade;
 import session.SubjectFacade;
 
@@ -24,11 +28,15 @@ import session.SubjectFacade;
  */
 @WebServlet(name = "LoginServlet",loadOnStartup = 1, urlPatterns = {
     "/showLogin",
+    "/listPersons",
     "/index",
+    "/listSubjects",
+    "/listJournals",
 })
 public class LoginServlet extends HttpServlet {
-@EJB private SubjectFacade subjectFacade;
 @EJB private PersonFacade personFacade;
+@EJB private SubjectFacade subjectFacade;
+@EJB private JournalFacade journalFacade;
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -42,34 +50,72 @@ public class LoginServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
-        switch (request.getServletPath()) {
-            case "/index":
-                request.getRequestDispatcher("/index.jsp")
-                        .forward(request, response);
-                break;
-            
-            
-            case "/showLogin":
-                request.setAttribute("info", "Привет из LoginServlet");
-                request.getRequestDispatcher("/showLogin.jsp")
-                        .forward(request, response);
-                break;
-            case "/login":
-                String login = request.getParameter("login");
-                String password = request.getParameter("password");
-                if("admin".equals(login)
-                        && "123123".equals(password)){
-                    request.setAttribute("info", "Привет "+login);
-                } else{
-                    request.setAttribute("info", "Неправелньный логин или пароль");
-                }   
-                request.getRequestDispatcher("/index")
-                        .forward(request, response);
-                break;
+        try (PrintWriter out = response.getWriter()) {
+            if(null != request.getServletPath())switch (request.getServletPath()) {
+                case "/showLogin":
+                    request.setAttribute("info", "Привет из LoginServlet");
+                    request.getRequestDispatcher("/showLogin.jsp")
+                            .forward(request, response);
+                    break;
+                case "/listPersons":
+                    List<Person> listPersons= personFacade.findAll();
+                    request.setAttribute("listPersons", listPersons);
+                    request.setAttribute("info", "Привет из personServlet");
+                    request.getRequestDispatcher("/listPersons.jsp")
+                            .forward(request, response);
+                    break;
+                case "/index":
+                    request.getRequestDispatcher("/index")
+                            .forward(request, response);
+                    break;
+                case "/listSubjects":
+                    List<Subject> listSubjects= subjectFacade.findAll();
+                    request.setAttribute("listSubjects", listSubjects);
+                    request.setAttribute("info", "Привет из subjectsServlet");
+                    request.getRequestDispatcher("/listSubjects.jsp")
+                            .forward(request, response);
+                    break;
+                case "/listJournals":
+                    List<Journal> listJournals= journalFacade.findAll();
+                    request.setAttribute("listJournals", listJournals);
+                    request.setAttribute("info", "Привет из LoginServlet");
+                    request.getRequestDispatcher("/listJournals.jsp")
+                            .forward(request, response);
+                    break;
+                /*case "/login":
+                    String login = request.getParameter("login");
+                    String password = request.getParameter("password");
+                    User user = userFacade.findByLogin(login);
+                    if(user == null){
+                        request.setAttribute("info", "нет такого пользователя или неправельный пароль");
+                        request.getRequestDispatcher("/showLogin")
+                                .forward(request, response);
+                    }
+                    if(!password.equals(user.getPassword())){
+                        request.setAttribute("info", "нет такого пользователя или неправельный пароль");
+                        request.getRequestDispatcher("/showLogin")
+                                .forward(request, response);
+                    }
+                    HttpSession session = request.getSession(true);
+                    session.setAttribute("user", user);
+                    session.setAttribute("info", "Привет "+user.getPerson().getFirstame());
+                    
+                    request.getRequestDispatcher("/index")
+                            .forward(request, response);
+                    break;
+                case"/logout":
+                    session = request.getSession(false);
+                    if(session != null){
+                        session.invalidate();
+                    }
+                    request.setAttribute("info", "Вы вышли");
+                    request.getRequestDispatcher("/index")
+                            .forward(request, response);
+                    break;*/
+                default:
+                    break;
+            }
         }
-
-        
-       
 
     }
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

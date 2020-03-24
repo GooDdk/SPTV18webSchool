@@ -32,7 +32,7 @@ public class JournalFacade extends AbstractFacade<Journal> {
 
     public List<Journal> findByReturnNull() {
         try {
-            return em.createQuery("SELECT h FROM Journal h WHERE h.returnPerson = null")
+            return em.createQuery("SELECT j FROM Journal j WHERE j.returnPerson = null")
                     .getResultList();
         } catch (Exception e) {
             return null;

@@ -3,6 +3,7 @@ package servlets;
 import entity.Person;
 import entity.Subject;
 import java.io.IOException;
+import java.util.List;
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -14,15 +15,11 @@ import session.SubjectFacade;
 
 
 @WebServlet(name = "AdminServlet", urlPatterns = {
-    "/addSubjects",
-    "/listPersons",
-    "/listSubjects",
+    "/showNewSubject",
+    "/addSubject",
+    "/showNewPerson",
     "/addPerson",
-    "/showTakeSubject",
-    "/createJournal",
-    "/showReturnSubject",
-    "/returnSubject",
-    
+    "/showNewJournal",
 })
 public class AdminServlet extends HttpServlet {
     @EJB private SubjectFacade subjectFacade;
@@ -51,9 +48,9 @@ public class AdminServlet extends HttpServlet {
                 if(subjectName == null || "".equals(subjectName)
                         || subjectHours == null || "".equals(subjectHours)){
                     request.setAttribute("subjectName",subjectName);
-                    request.setAttribute("lastName",subjectHours);
+                    request.setAttribute("subjectHours",subjectHours);
                     request.setAttribute("info", "Заполните все поля!");
-                    request.getRequestDispatcher("/showNewSubject")
+                    request.getRequestDispatcher("/showNewSubject.jsp")
                             .forward(request, response);
                 }
                 Subject subject = new Subject(subjectName, subjectHours);
@@ -80,18 +77,33 @@ public class AdminServlet extends HttpServlet {
                     request.setAttribute("lastName",lastName);
                     request.setAttribute("personi",personi);
                     request.setAttribute("isikukood",isikukood);
-                    
                     request.setAttribute("info", "Заполните все поля!");
-                    request.getRequestDispatcher("/showNewPerson")
+                    request.getRequestDispatcher("/showNewPerson.jsp")
                             .forward(request, response);
                 }
-                Person person = new Person(name, lastName, personi, isikukood);
-                personFacade.create(person);
+
+                Person person = null;
+                try{
+                    person = new Person(name, lastName, personi, isikukood);
+                    personFacade.create(person);
+                } catch(Exception e) {
+                    if(person != null){
+                        personFacade.remove(person);
+                    }
+                }
                 request.setAttribute("info", "Учитель/Ученик \""+person.getName() + " " + person.getLastName() + "\" добавлен в базу");
                 request.getRequestDispatcher("/index")
                         .forward(request, response);
-
-                break;  
+                    break;
+                case "/showNewJournal":
+                List<Person> listPersons = personFacade.findAll();
+                List<Subject> listSubjects = subjectFacade.findAll();
+                request.setAttribute("listPersons", listPersons);
+                request.setAttribute("listSubjects", listSubjects);
+                request.getRequestDispatcher("/showNewJournal.jsp")
+                        .forward(request, response);
+                    break;
+               
              
         }
     }

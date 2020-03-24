@@ -15,6 +15,7 @@
             <a href="listPersons">Список учеников/учителей</a><br>
             <a href="showNewSubject">Добавить предмет</a><br>
             <a href="listSubjects">Список предметов</a><br>
+            <a href="showNewJournal">Выставить оценку</a><br>
         </p>
     </body>
 </html>
